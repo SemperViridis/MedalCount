@@ -1,0 +1,6 @@
+### node etc ###
+# Config
+
+# Compiled Dirs (http://nodejs.org/api/addons.html)
+
+node_modules/
