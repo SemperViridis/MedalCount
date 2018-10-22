@@ -19,74 +19,10 @@ function widget(element_id, sortBy) {
 
       _this.state = {
         mounted: 'Mounted with state!',
-        medals: [{
-          "code": "USA",
-          "gold": 9,
-          "silver": 7,
-          "bronze": 12
-        }, {
-          "code": "NOR",
-          "gold": 11,
-          "silver": 5,
-          "bronze": 10
-        }, {
-          "code": "RUS",
-          "gold": 13,
-          "silver": 11,
-          "bronze": 9
-        }, {
-          "code": "NED",
-          "gold": 8,
-          "silver": 7,
-          "bronze": 9
-        }, {
-          "code": "FRA",
-          "gold": 4,
-          "silver": 4,
-          "bronze": 7
-        }, {
-          "code": "SWE",
-          "gold": 2,
-          "silver": 7,
-          "bronze": 6
-        }, {
-          "code": "ITA",
-          "gold": 0,
-          "silver": 2,
-          "bronze": 6
-        }, {
-          "code": "CAN",
-          "gold": 10,
-          "silver": 10,
-          "bronze": 5
-        }, {
-          "code": "SUI",
-          "gold": 6,
-          "silver": 3,
-          "bronze": 2
-        }, {
-          "code": "BLR",
-          "gold": 5,
-          "silver": 0,
-          "bronze": 1
-        }, {
-          "code": "GER",
-          "gold": 8,
-          "silver": 6,
-          "bronze": 5
-        }, {
-          "code": "AUT",
-          "gold": 4,
-          "silver": 8,
-          "bronze": 5
-        }, {
-          "code": "CHN",
-          "gold": 3,
-          "silver": 4,
-          "bronze": 2
-        }],
+        medals: [],
         sortBy: sortBy
       };
+      _this.handleSorterChange = _this.handleSorterChange.bind(_this);
       return _this;
     }
 
@@ -98,23 +34,20 @@ function widget(element_id, sortBy) {
         console.log(this.state.mounted);
         $.ajax({
           method: 'GET',
-          url: 'http://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json',
-          xhrFields: {
-            withCredentials: true
-          },
-          crossDomain: true,
+          url: 'https://cors-escape.herokuapp.com/https://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json',
           success: function success(data) {
-            console.log('this is component did mount data: ', data);
+            console.log('data from ajax request', data);
             _this2.setState({
-              medalCounts: data
+              medals: data
+            }, function () {
+              _this2.calculateTotals();
+              _this2.sortByMedal();
             });
           },
           error: function error(err) {
             console.log('get request error: ', err);
           }
         });
-        this.calculateTotals();
-        this.sortByMedal();
       }
     }, {
       key: 'calculateTotals',
@@ -130,16 +63,39 @@ function widget(element_id, sortBy) {
       value: function sortByMedal() {
         var medals = this.state.medals;
         var sorter = this.state.sortBy;
+        var tiebreaker = 'gold';
+        if (sorter === 'gold') {
+          tiebreaker = 'silver';
+        }
         medals.sort(function (a, b) {
-          return b[sorter] - a[sorter];
+
+          if (a[sorter] > b[sorter]) {
+            return -1;
+          }
+          if (a[sorter] < b[sorter]) {
+            return 1;
+          }
+          if (a[tiebreaker] > b[tiebreaker]) {
+            return -1;
+          }
+          if (a[tiebreaker] < b[tiebreaker]) {
+            return 1;
+          }
+          return 0;
         });
+
         this.setState({ medals: medals });
+      }
+    }, {
+      key: 'handleSorterChange',
+      value: function handleSorterChange(e) {
+        var newSorter = e.target.id;
+        console.log(newSorter);
+        this.setState({ sortBy: newSorter }, this.sortByMedal);
       }
     }, {
       key: 'render',
       value: function render() {
-        var _this3 = this;
-
         return React.createElement(
           'table',
           { className: 'responsive-table' },
@@ -166,27 +122,27 @@ function widget(element_id, sortBy) {
               ),
               React.createElement(
                 'th',
-                { scope: 'col' },
+                { scope: 'col', className: 'code' },
                 'Country'
               ),
               React.createElement(
                 'th',
-                { scope: 'col' },
-                'Gold'
+                { scope: 'col', onClick: this.handleSorterChange },
+                React.createElement('div', { className: 'medal', id: 'gold' })
               ),
               React.createElement(
                 'th',
-                { scope: 'col' },
-                'Silver'
+                { scope: 'col', onClick: this.handleSorterChange },
+                React.createElement('div', { className: 'medal', id: 'silver' })
               ),
               React.createElement(
                 'th',
-                { scope: 'col' },
-                'Bronze'
+                { scope: 'col', onClick: this.handleSorterChange },
+                React.createElement('div', { className: 'medal', id: 'bronze' })
               ),
               React.createElement(
                 'th',
-                { scope: 'col' },
+                { scope: 'col', id: 'total', onClick: this.handleSorterChange },
                 'Total'
               )
             )
@@ -207,37 +163,36 @@ function widget(element_id, sortBy) {
                   React.createElement(
                     'td',
                     { 'data-title': 'Flag' },
-                    'Flag Here'
+                    React.createElement('div', { className: 'flag', id: medal.code.toLowerCase() })
                   ),
                   React.createElement(
                     'td',
                     { 'data-title': 'Country' },
-                    _this3.state.medals[i].code
+                    medal.code
                   ),
                   React.createElement(
                     'td',
                     { 'data-title': 'Gold' },
-                    _this3.state.medals[i].gold
+                    medal.gold
                   ),
                   React.createElement(
                     'td',
                     { 'data-title': 'Silver' },
-                    _this3.state.medals[i].silver
+                    medal.silver
                   ),
                   React.createElement(
                     'td',
                     { 'data-title': 'Bronze' },
-                    _this3.state.medals[i].bronze
+                    medal.bronze
                   ),
                   React.createElement(
                     'td',
                     { 'data-title': 'Total' },
-                    _this3.state.medals[i].total
+                    medal.total
                   )
                 );
               }
-            }),
-            ' }'
+            })
           )
         );
       }

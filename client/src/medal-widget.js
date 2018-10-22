@@ -6,111 +6,32 @@ function widget (element_id, sortBy) {
       super(props);
       this.state = {
         mounted: 'Mounted with state!',
-        medals: [{
-           "code": "USA",
-           "gold": 9,
-           "silver": 7,
-           "bronze": 12
-         },
-         {
-           "code": "NOR",
-           "gold": 11,
-           "silver": 5,
-           "bronze": 10
-         },
-         {
-           "code": "RUS",
-           "gold": 13,
-           "silver": 11,
-           "bronze": 9
-         },
-         {
-           "code": "NED",
-           "gold": 8,
-           "silver": 7,
-           "bronze": 9
-         },
-         {
-           "code": "FRA",
-           "gold": 4,
-           "silver": 4,
-           "bronze": 7
-         },
-         {
-           "code": "SWE",
-           "gold": 2,
-           "silver": 7,
-           "bronze": 6
-         },
-         {
-           "code": "ITA",
-           "gold": 0,
-           "silver": 2,
-           "bronze": 6
-         },
-         {
-           "code": "CAN",
-           "gold": 10,
-           "silver": 10,
-           "bronze": 5
-         },
-         {
-           "code": "SUI",
-           "gold": 6,
-           "silver": 3,
-           "bronze": 2
-         },
-         {
-           "code": "BLR",
-           "gold": 5,
-           "silver": 0,
-           "bronze": 1
-         },
-         {
-           "code": "GER",
-           "gold": 8,
-           "silver": 6,
-           "bronze": 5
-         },
-         {
-           "code": "AUT",
-           "gold": 4,
-           "silver": 8,
-           "bronze": 5
-         },
-         {
-           "code": "CHN",
-           "gold": 3,
-           "silver": 4,
-           "bronze": 2
-         }
-       ],
+        medals: [],
        sortBy: sortBy
       }
+      this.handleSorterChange = this.handleSorterChange.bind(this);
     }
     componentDidMount () {
       console.log(this.state.mounted);
       $.ajax({
         method: 'GET',
-        url: 'http://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json',
-        xhrFields: {
-          withCredentials: true
-        },
-        crossDomain: true,
+        url: 'https://cors-escape.herokuapp.com/https://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json',
         success: (data) => {
-          console.log('this is component did mount data: ', data);
+          console.log('data from ajax request', data);
           this.setState({
-            medalCounts: data
+            medals: data
+          }, () => {
+            this.calculateTotals();
+            this.sortByMedal();
           });
         },
         error: (err) => {
           console.log('get request error: ', err);
         }
       })
-      this.calculateTotals();
-      this.sortByMedal();
 
     }
+
 
     calculateTotals () {
       let medals = this.state.medals
@@ -122,10 +43,35 @@ function widget (element_id, sortBy) {
     sortByMedal () {
       let medals = this.state.medals;
       let sorter = this.state.sortBy;
+      let tiebreaker = 'gold';
+      if (sorter === 'gold') {
+        tiebreaker = 'silver';
+      }
       medals.sort((a, b) => {
-        return b[sorter] - a[sorter];
-      })
+
+          if (a[sorter] > b[sorter]) {
+            return -1;
+          }
+          if (a[sorter] < b[sorter]) {
+            return 1;
+          }
+          if (a[tiebreaker] > b[tiebreaker]) {
+            return -1;
+          }
+          if (a[tiebreaker] < b[tiebreaker]) {
+            return 1;
+          }
+          return 0;
+        })
+
       this.setState({medals: medals});
+
+    }
+    handleSorterChange (e) {
+      const newSorter = e.target.id;
+      console.log(newSorter);
+      this.setState({sortBy: newSorter}, this.sortByMedal);
+
     }
 
     render() {
@@ -136,11 +82,11 @@ function widget (element_id, sortBy) {
             <tr>
             <th scope="col">Rank</th>
             <th scope="col">Flag</th>
-            <th scope="col">Country</th>
-            <th scope="col">Gold</th>
-            <th scope="col">Silver</th>
-            <th scope="col">Bronze</th>
-            <th scope="col">Total</th>
+            <th scope="col" className="code">Country</th>
+            <th scope="col" onClick={this.handleSorterChange}><div className="medal" id="gold"></div></th>
+            <th scope="col" onClick={this.handleSorterChange}><div className="medal" id="silver"></div></th>
+            <th scope="col" onClick={this.handleSorterChange}><div className="medal" id="bronze"></div></th>
+            <th scope="col" id="total" onClick={this.handleSorterChange}>Total</th>
             </tr>
           </thead>
           <tbody>
@@ -149,19 +95,18 @@ function widget (element_id, sortBy) {
               return(
                 <tr>
                   <th scope="row">{i + 1}</th>
-                  <td data-title="Flag">Flag Here</td>
-                  <td data-title="Country">{this.state.medals[i].code}</td>
-                  <td data-title="Gold">{this.state.medals[i].gold}</td>
-                  <td data-title="Silver">{this.state.medals[i].silver}</td>
-                  <td data-title="Bronze">{this.state.medals[i].bronze}</td>
-                  <td data-title="Total">{this.state.medals[i].total}</td>
+                  <td data-title="Flag"><div className="flag" id={medal.code.toLowerCase()}></div></td>
+                  <td data-title="Country">{medal.code}</td>
+                  <td data-title="Gold">{medal.gold}</td>
+                  <td data-title="Silver">{medal.silver}</td>
+                  <td data-title="Bronze">{medal.bronze}</td>
+                  <td data-title="Total">{medal.total}</td>
                 </tr>
               )
             }
-
           })
 
-          } }
+          }
           </tbody>
         </table>
       );
