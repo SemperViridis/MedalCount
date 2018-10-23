@@ -16,7 +16,7 @@ color: #808080;
   ========================================
 */
 
-.tableContainer {
+.container {
     display: block;
     width: 100%;
     padding: 10px;
@@ -55,6 +55,7 @@ th{
 
 .total {
   font-weight: bold;
+  margin: auto;
   width: 35px;
   color: #505050;
 }

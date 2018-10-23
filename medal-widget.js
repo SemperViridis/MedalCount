@@ -19,7 +19,7 @@ function widget(element_id, sortBy) {
 
       _this.state = {
         medals: [],
-        sortBy: sortBy,
+        sortBy: _this.props.sortBy,
         error: ''
       };
       _this.handleSorterChange = _this.handleSorterChange.bind(_this);
@@ -67,7 +67,6 @@ function widget(element_id, sortBy) {
           tiebreaker = 'silver';
         }
         medals.sort(function (a, b) {
-
           if (a[sorter] > b[sorter]) {
             return -1;
           }
@@ -89,7 +88,6 @@ function widget(element_id, sortBy) {
       key: 'handleSorterChange',
       value: function handleSorterChange(e) {
         var newSorter = e.target.id;
-        console.log(newSorter);
         this.setState({ sortBy: newSorter }, this.sortByMedal);
       }
     }, {
@@ -101,7 +99,7 @@ function widget(element_id, sortBy) {
           null,
           React.createElement(
             'table',
-            { className: 'tableContainer' },
+            { className: 'container' },
             React.createElement(
               'caption',
               null,
@@ -118,22 +116,46 @@ function widget(element_id, sortBy) {
                 React.createElement('th', { scope: 'col', className: 'code' }),
                 React.createElement(
                   'th',
-                  { scope: 'col', className: this.state.sortBy === 'gold' ? 'active' : '' },
-                  React.createElement('div', { className: 'medal', id: 'gold', onClick: this.handleSorterChange })
+                  {
+                    scope: 'col',
+                    className: this.state.sortBy === 'gold' ? 'active' : ''
+                  },
+                  React.createElement('div', {
+                    className: 'medal',
+                    id: 'gold',
+                    onClick: this.handleSorterChange
+                  })
                 ),
                 React.createElement(
                   'th',
-                  { scope: 'col', className: this.state.sortBy === 'silver' ? 'active' : '' },
-                  React.createElement('div', { className: 'medal', id: 'silver', onClick: this.handleSorterChange })
+                  {
+                    scope: 'col',
+                    className: this.state.sortBy === 'silver' ? 'active' : ''
+                  },
+                  React.createElement('div', {
+                    className: 'medal',
+                    id: 'silver',
+                    onClick: this.handleSorterChange
+                  })
                 ),
                 React.createElement(
                   'th',
-                  { scope: 'col', className: this.state.sortBy === 'bronze' ? 'active' : '' },
-                  React.createElement('div', { className: 'medal', id: 'bronze', onClick: this.handleSorterChange })
+                  {
+                    scope: 'col',
+                    className: this.state.sortBy === 'bronze' ? 'active' : ''
+                  },
+                  React.createElement('div', {
+                    className: 'medal',
+                    id: 'bronze',
+                    onClick: this.handleSorterChange
+                  })
                 ),
                 React.createElement(
                   'th',
-                  { scope: 'col', className: this.state.sortBy === 'total' ? 'active' : '' },
+                  {
+                    scope: 'col',
+                    className: this.state.sortBy === 'total' ? 'active' : ''
+                  },
                   React.createElement(
                     'div',
                     { id: 'total', onClick: this.handleSorterChange },
@@ -171,28 +193,28 @@ function widget(element_id, sortBy) {
                     ),
                     React.createElement(
                       'td',
-                      { 'data-title': 'Gold', className: 'count' },
+                      { 'data-title': 'Gold' },
                       React.createElement(
                         'div',
-                        null,
+                        { className: 'count' },
                         medal.gold
                       )
                     ),
                     React.createElement(
                       'td',
-                      { 'data-title': 'Silver', className: 'count' },
+                      { 'data-title': 'Silver' },
                       React.createElement(
                         'div',
-                        null,
+                        { className: 'count' },
                         medal.silver
                       )
                     ),
                     React.createElement(
                       'td',
-                      { 'data-title': 'Bronze', className: 'count' },
+                      { 'data-title': 'Bronze' },
                       React.createElement(
                         'div',
-                        null,
+                        { className: 'count' },
                         medal.bronze
                       )
                     ),
@@ -222,5 +244,5 @@ function widget(element_id, sortBy) {
     return MedalCount;
   }(React.Component);
 
-  ReactDOM.render(React.createElement(MedalCount, null), document.getElementById(element_id));
-};
+  ReactDOM.render(React.createElement(MedalCount, { sortBy: sortBy }), document.getElementById(element_id));
+}
