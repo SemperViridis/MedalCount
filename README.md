@@ -6,7 +6,7 @@ The [Medal Count Widget] presents Olympic results, sortable by type of medal or 
 
 1. The widget is written in React and can be embedded in any website
 
-2. Babel is used to compile the React code to ensure compatibility with older browsers. Babel enters in the client/src folder and produces the script to be utilized by the target website (medal-widget.js in the root directory)
+2. Babel is used to compile the React code to allow use of JSX and compatibility with older browsers. Babel enters in the client/src folder and produces the script to be utilized by the target website (medal-widget.js in the root directory)
 
 3. To develop locally, Node.js must be installed on the machine. In the project folder in terminal, Run:
 
