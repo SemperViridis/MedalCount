@@ -5,34 +5,30 @@ function widget (element_id, sortBy) {
     constructor(props) {
       super(props);
       this.state = {
-        mounted: 'Mounted with state!',
         medals: [],
-       sortBy: sortBy
+       sortBy: sortBy,
+       error: ''
       }
       this.handleSorterChange = this.handleSorterChange.bind(this);
     }
     componentDidMount () {
-      console.log(this.state.mounted);
-      $.ajax({
-        method: 'GET',
-        url: 'https://cors-escape.herokuapp.com/https://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json',
-        success: (data) => {
-          console.log('data from ajax request', data);
-          this.setState({
-            medals: data
+      fetch('https://cors-anywhere.herokuapp.com/https://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json', {
+        method: 'get'
+      })
+      .then(response => response.json())
+      .then(data => this.setState({
+            medals: data,
+            error: ''
           }, () => {
             this.calculateTotals();
             this.sortByMedal();
-          });
-        },
-        error: (err) => {
-          console.log('get request error: ', err);
-        }
+          }))
+      .catch(err => {
+        console.log('Error in fetching medal data', err);
+        this.setState({error: 'Unable to load Medal data'})
+
       })
-
     }
-
-
     calculateTotals () {
       let medals = this.state.medals
       medals.forEach(medal => {
@@ -75,18 +71,20 @@ function widget (element_id, sortBy) {
     }
 
     render() {
+      const err = this.state.error || null;
       return (
-        <table className="responsive-table">
-          <caption> Medal Count </caption>
+        <div>
+        <table className="tableContainer">
+          <caption> MEDAL COUNT </caption>
           <thead>
             <tr>
-            <th scope="col">Rank</th>
-            <th scope="col">Flag</th>
-            <th scope="col" className="code">Country</th>
-            <th scope="col" onClick={this.handleSorterChange}><div className="medal" id="gold"></div></th>
-            <th scope="col" onClick={this.handleSorterChange}><div className="medal" id="silver"></div></th>
-            <th scope="col" onClick={this.handleSorterChange}><div className="medal" id="bronze"></div></th>
-            <th scope="col" id="total" onClick={this.handleSorterChange}>Total</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+              <th scope="col" className="code"></th>
+              <th scope="col" className={this.state.sortBy === 'gold' ? 'active' : ''}><div className="medal" id="gold" onClick={this.handleSorterChange}></div></th>
+              <th scope="col" className={this.state.sortBy === 'silver' ? 'active' : ''}><div className="medal" id="silver" onClick={this.handleSorterChange}></div></th>
+              <th scope="col" className={this.state.sortBy === 'bronze' ? 'active' : ''}><div className="medal" id="bronze" onClick={this.handleSorterChange}></div></th>
+              <th scope="col"  className={this.state.sortBy === 'total' ? 'active' : ''}><div id="total" onClick={this.handleSorterChange}>TOTAL</div></th>
             </tr>
           </thead>
           <tbody>
@@ -94,14 +92,15 @@ function widget (element_id, sortBy) {
             if (i < 10) {
               return(
                 <tr>
-                  <th scope="row">{i + 1}</th>
+                  <td scope="row">{i + 1}</td>
                   <td data-title="Flag"><div className="flag" id={medal.code.toLowerCase()}></div></td>
-                  <td data-title="Country">{medal.code}</td>
-                  <td data-title="Gold">{medal.gold}</td>
-                  <td data-title="Silver">{medal.silver}</td>
-                  <td data-title="Bronze">{medal.bronze}</td>
-                  <td data-title="Total">{medal.total}</td>
+                  <td data-title="Country"><div className="code">{medal.code}</div></td>
+                  <td data-title="Gold" className="count"><div>{medal.gold}</div></td>
+                  <td data-title="Silver" className="count"><div>{medal.silver}</div></td>
+                  <td data-title="Bronze" className="count"><div>{medal.bronze}</div></td>
+                  <td data-title="Total"><div className="total">{medal.total}</div></td>
                 </tr>
+
               )
             }
           })
@@ -109,6 +108,8 @@ function widget (element_id, sortBy) {
           }
           </tbody>
         </table>
+        <div>{this.state.error}</div>
+        </div>
       );
     }
   }

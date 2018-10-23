@@ -1,3 +1,64 @@
+/*
+  ========================================
+  Custom styles
+  ========================================
+*/
+body {
+
+font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+color: #808080;
+}
+
+
+/*
+  ========================================
+  Table
+  ========================================
+*/
+
+.tableContainer {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border-collapse: collapse;
+
+}
+
+caption {
+  text-align: left;
+  font-size: 20px;
+  padding: 0px 0px 15px;
+}
+
+td {
+  padding: 5px;
+  vertical-align: middle;
+  text-align: center;
+  border-bottom: thin solid grey;
+}
+
+th{
+  padding: 5px;
+  width: 20px;
+  border-bottom: 2px solid grey;
+}
+
+.code{
+  text-align: left;
+  width: 65px;
+  font-weight: bold;
+}
+
+.count {
+  width: 30px
+}
+
+.total {
+  font-weight: bold;
+  width: 35px;
+  color: #505050;
+}
+
 
 /*
   ========================================
@@ -28,6 +89,10 @@
 
   background-color: #554A3C;
 
+}
+
+.active {
+  border-top: 3px solid grey;
 }
 
 /*

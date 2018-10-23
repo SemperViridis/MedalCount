@@ -18,9 +18,9 @@ function widget(element_id, sortBy) {
       var _this = _possibleConstructorReturn(this, (MedalCount.__proto__ || Object.getPrototypeOf(MedalCount)).call(this, props));
 
       _this.state = {
-        mounted: 'Mounted with state!',
         medals: [],
-        sortBy: sortBy
+        sortBy: sortBy,
+        error: ''
       };
       _this.handleSorterChange = _this.handleSorterChange.bind(_this);
       return _this;
@@ -31,22 +31,21 @@ function widget(element_id, sortBy) {
       value: function componentDidMount() {
         var _this2 = this;
 
-        console.log(this.state.mounted);
-        $.ajax({
-          method: 'GET',
-          url: 'https://cors-escape.herokuapp.com/https://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json',
-          success: function success(data) {
-            console.log('data from ajax request', data);
-            _this2.setState({
-              medals: data
-            }, function () {
-              _this2.calculateTotals();
-              _this2.sortByMedal();
-            });
-          },
-          error: function error(err) {
-            console.log('get request error: ', err);
-          }
+        fetch('https://cors-anywhere.herokuapp.com/https://s3-us-west-2.amazonaws.com/reuters.medals-widget/medals.json', {
+          method: 'get'
+        }).then(function (response) {
+          return response.json();
+        }).then(function (data) {
+          return _this2.setState({
+            medals: data,
+            error: ''
+          }, function () {
+            _this2.calculateTotals();
+            _this2.sortByMedal();
+          });
+        }).catch(function (err) {
+          console.log('Error in fetching medal data', err);
+          _this2.setState({ error: 'Unable to load Medal data' });
         });
       }
     }, {
@@ -96,103 +95,125 @@ function widget(element_id, sortBy) {
     }, {
       key: 'render',
       value: function render() {
+        var err = this.state.error || null;
         return React.createElement(
-          'table',
-          { className: 'responsive-table' },
+          'div',
+          null,
           React.createElement(
-            'caption',
-            null,
-            ' Medal Count '
-          ),
-          React.createElement(
-            'thead',
-            null,
+            'table',
+            { className: 'tableContainer' },
             React.createElement(
-              'tr',
+              'caption',
+              null,
+              ' MEDAL COUNT '
+            ),
+            React.createElement(
+              'thead',
               null,
               React.createElement(
-                'th',
-                { scope: 'col' },
-                'Rank'
-              ),
-              React.createElement(
-                'th',
-                { scope: 'col' },
-                'Flag'
-              ),
-              React.createElement(
-                'th',
-                { scope: 'col', className: 'code' },
-                'Country'
-              ),
-              React.createElement(
-                'th',
-                { scope: 'col', onClick: this.handleSorterChange },
-                React.createElement('div', { className: 'medal', id: 'gold' })
-              ),
-              React.createElement(
-                'th',
-                { scope: 'col', onClick: this.handleSorterChange },
-                React.createElement('div', { className: 'medal', id: 'silver' })
-              ),
-              React.createElement(
-                'th',
-                { scope: 'col', onClick: this.handleSorterChange },
-                React.createElement('div', { className: 'medal', id: 'bronze' })
-              ),
-              React.createElement(
-                'th',
-                { scope: 'col', id: 'total', onClick: this.handleSorterChange },
-                'Total'
+                'tr',
+                null,
+                React.createElement('th', { scope: 'col' }),
+                React.createElement('th', { scope: 'col' }),
+                React.createElement('th', { scope: 'col', className: 'code' }),
+                React.createElement(
+                  'th',
+                  { scope: 'col', className: this.state.sortBy === 'gold' ? 'active' : '' },
+                  React.createElement('div', { className: 'medal', id: 'gold', onClick: this.handleSorterChange })
+                ),
+                React.createElement(
+                  'th',
+                  { scope: 'col', className: this.state.sortBy === 'silver' ? 'active' : '' },
+                  React.createElement('div', { className: 'medal', id: 'silver', onClick: this.handleSorterChange })
+                ),
+                React.createElement(
+                  'th',
+                  { scope: 'col', className: this.state.sortBy === 'bronze' ? 'active' : '' },
+                  React.createElement('div', { className: 'medal', id: 'bronze', onClick: this.handleSorterChange })
+                ),
+                React.createElement(
+                  'th',
+                  { scope: 'col', className: this.state.sortBy === 'total' ? 'active' : '' },
+                  React.createElement(
+                    'div',
+                    { id: 'total', onClick: this.handleSorterChange },
+                    'TOTAL'
+                  )
+                )
               )
+            ),
+            React.createElement(
+              'tbody',
+              null,
+              this.state.medals.map(function (medal, i) {
+                if (i < 10) {
+                  return React.createElement(
+                    'tr',
+                    null,
+                    React.createElement(
+                      'td',
+                      { scope: 'row' },
+                      i + 1
+                    ),
+                    React.createElement(
+                      'td',
+                      { 'data-title': 'Flag' },
+                      React.createElement('div', { className: 'flag', id: medal.code.toLowerCase() })
+                    ),
+                    React.createElement(
+                      'td',
+                      { 'data-title': 'Country' },
+                      React.createElement(
+                        'div',
+                        { className: 'code' },
+                        medal.code
+                      )
+                    ),
+                    React.createElement(
+                      'td',
+                      { 'data-title': 'Gold', className: 'count' },
+                      React.createElement(
+                        'div',
+                        null,
+                        medal.gold
+                      )
+                    ),
+                    React.createElement(
+                      'td',
+                      { 'data-title': 'Silver', className: 'count' },
+                      React.createElement(
+                        'div',
+                        null,
+                        medal.silver
+                      )
+                    ),
+                    React.createElement(
+                      'td',
+                      { 'data-title': 'Bronze', className: 'count' },
+                      React.createElement(
+                        'div',
+                        null,
+                        medal.bronze
+                      )
+                    ),
+                    React.createElement(
+                      'td',
+                      { 'data-title': 'Total' },
+                      React.createElement(
+                        'div',
+                        { className: 'total' },
+                        medal.total
+                      )
+                    )
+                  );
+                }
+              })
             )
           ),
           React.createElement(
-            'tbody',
+            'div',
             null,
-            this.state.medals.map(function (medal, i) {
-              if (i < 10) {
-                return React.createElement(
-                  'tr',
-                  null,
-                  React.createElement(
-                    'th',
-                    { scope: 'row' },
-                    i + 1
-                  ),
-                  React.createElement(
-                    'td',
-                    { 'data-title': 'Flag' },
-                    React.createElement('div', { className: 'flag', id: medal.code.toLowerCase() })
-                  ),
-                  React.createElement(
-                    'td',
-                    { 'data-title': 'Country' },
-                    medal.code
-                  ),
-                  React.createElement(
-                    'td',
-                    { 'data-title': 'Gold' },
-                    medal.gold
-                  ),
-                  React.createElement(
-                    'td',
-                    { 'data-title': 'Silver' },
-                    medal.silver
-                  ),
-                  React.createElement(
-                    'td',
-                    { 'data-title': 'Bronze' },
-                    medal.bronze
-                  ),
-                  React.createElement(
-                    'td',
-                    { 'data-title': 'Total' },
-                    medal.total
-                  )
-                );
-              }
-            })
+            this.state.error
           )
         );
       }
