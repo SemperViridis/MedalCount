@@ -41,7 +41,6 @@ function widget(element_id, sortBy) {
             error: ''
           }, function () {
             _this2.calculateTotals();
-            _this2.sortByMedal();
           });
         }).catch(function (err) {
           console.log('Error in fetching medal data', err);
@@ -49,46 +48,56 @@ function widget(element_id, sortBy) {
         });
       }
     }, {
+      key: 'componentDidUpdate',
+      value: function componentDidUpdate(prevProps, prevState) {
+        if (prevState.sortBy !== this.state.sortBy) {
+          this.sortByMedal();
+        }
+      }
+    }, {
       key: 'calculateTotals',
       value: function calculateTotals() {
-        var medals = this.state.medals;
-        medals.forEach(function (medal) {
-          medal.total = medal.gold + medal.bronze + medal.silver;
-        });
-        this.setState({ medals: medals });
+        this.setState(function (prevState, props) {
+          var medals = prevState.medals;
+          medals.forEach(function (medal) {
+            medal.total = medal.gold + medal.bronze + medal.silver;
+          });
+          return { medals: medals };
+        }, this.sortByMedal);
       }
     }, {
       key: 'sortByMedal',
       value: function sortByMedal() {
-        var medals = this.state.medals;
-        var sorter = this.state.sortBy;
-        var tiebreaker = 'gold';
-        if (sorter === 'gold') {
-          tiebreaker = 'silver';
-        }
-        medals.sort(function (a, b) {
-          if (a[sorter] > b[sorter]) {
-            return -1;
+        this.setState(function (prevState, props) {
+          var medals = prevState.medals;
+          var sorter = prevState.sortBy;
+          var tiebreaker = 'gold';
+          if (sorter === 'gold') {
+            tiebreaker = 'silver';
           }
-          if (a[sorter] < b[sorter]) {
-            return 1;
-          }
-          if (a[tiebreaker] > b[tiebreaker]) {
-            return -1;
-          }
-          if (a[tiebreaker] < b[tiebreaker]) {
-            return 1;
-          }
-          return 0;
+          medals.sort(function (a, b) {
+            if (a[sorter] > b[sorter]) {
+              return -1;
+            }
+            if (a[sorter] < b[sorter]) {
+              return 1;
+            }
+            if (a[tiebreaker] > b[tiebreaker]) {
+              return -1;
+            }
+            if (a[tiebreaker] < b[tiebreaker]) {
+              return 1;
+            }
+            return 0;
+          });
+          return { medals: medals };
         });
-
-        this.setState({ medals: medals });
       }
     }, {
       key: 'handleSorterChange',
       value: function handleSorterChange(e) {
         var newSorter = e.target.id;
-        this.setState({ sortBy: newSorter }, this.sortByMedal);
+        this.setState({ sortBy: newSorter });
       }
     }, {
       key: 'render',
@@ -235,7 +244,7 @@ function widget(element_id, sortBy) {
           React.createElement(
             'div',
             null,
-            this.state.error
+            err
           )
         );
       }

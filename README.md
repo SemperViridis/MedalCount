@@ -13,7 +13,7 @@ The [Medal Count Widget] presents Olympic results, sortable by type of medal or 
 npm init -y
 npm install babel-cli@6 babel-preset-react-app@3
 
-npx babel --watch src --out-dir . --presets react-app/prod
+npx babel --watch client/src --out-dir . --presets react-app/prod
 
 4. No bundler or server config is required to run the widget, however the target website must load the production React scripts:
 

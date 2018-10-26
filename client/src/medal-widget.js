@@ -27,7 +27,6 @@ function widget(element_id, sortBy) {
             },
             () => {
               this.calculateTotals();
-              this.sortByMedal();
             }
           )
         )
@@ -36,41 +35,49 @@ function widget(element_id, sortBy) {
           this.setState({ error: 'Unable to load Medal data' });
         });
     }
+    componentDidUpdate(prevProps, prevState) {
+      if(prevState.sortBy !== this.state.sortBy) {
+        this.sortByMedal();
+      }
+    }
     calculateTotals() {
-      let medals = this.state.medals;
-      medals.forEach(medal => {
-        medal.total = medal.gold + medal.bronze + medal.silver;
-      });
-      this.setState({ medals: medals });
+      this.setState((prevState, props) => {
+        let medals = prevState.medals;
+        medals.forEach(medal => {
+          medal.total = medal.gold + medal.bronze + medal.silver;
+        });
+        return {medals: medals}
+      }, this.sortByMedal);
     }
     sortByMedal() {
-      let medals = this.state.medals;
-      let sorter = this.state.sortBy;
-      let tiebreaker = 'gold';
-      if (sorter === 'gold') {
-        tiebreaker = 'silver';
-      }
-      medals.sort((a, b) => {
-        if (a[sorter] > b[sorter]) {
-          return -1;
+      this.setState((prevState, props) => {
+        let medals = prevState.medals;
+        let sorter = prevState.sortBy;
+        let tiebreaker = 'gold';
+        if (sorter === 'gold') {
+          tiebreaker = 'silver';
         }
-        if (a[sorter] < b[sorter]) {
-          return 1;
-        }
-        if (a[tiebreaker] > b[tiebreaker]) {
-          return -1;
-        }
-        if (a[tiebreaker] < b[tiebreaker]) {
-          return 1;
-        }
-        return 0;
+        medals.sort((a, b) => {
+          if (a[sorter] > b[sorter]) {
+            return -1;
+          }
+          if (a[sorter] < b[sorter]) {
+            return 1;
+          }
+          if (a[tiebreaker] > b[tiebreaker]) {
+            return -1;
+          }
+          if (a[tiebreaker] < b[tiebreaker]) {
+            return 1;
+          }
+          return 0;
+        });
+        return {medals:medals};
       });
-
-      this.setState({ medals: medals });
     }
     handleSorterChange(e) {
       const newSorter = e.target.id;
-      this.setState({ sortBy: newSorter }, this.sortByMedal);
+      this.setState({ sortBy: newSorter });
     }
 
     render() {
@@ -154,7 +161,7 @@ function widget(element_id, sortBy) {
               })}
             </tbody>
           </table>
-          <div>{this.state.error}</div>
+          <div>{err}</div>
         </div>
       );
     }
